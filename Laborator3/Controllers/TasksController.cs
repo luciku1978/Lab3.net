@@ -23,7 +23,7 @@ namespace Laborator3.Controllers
         [HttpGet]
         public IEnumerable<Models.Task> Get([FromQuery]DateTime? from, [FromQuery]DateTime? to)
         {
-            IQueryable<Models.Task> result = context.Tasks;
+            IQueryable<Models.Task> result = context.Tasks.Include(t => t.Comments);
 
             if (from == null && to == null)
                 return result;
@@ -41,7 +41,7 @@ namespace Laborator3.Controllers
         [HttpGet("{id}", Name = "Get")]
         public IActionResult Get(int id)
         {
-            var existing = context.Tasks.FirstOrDefault(task => task.Id == id);
+            var existing = context.Tasks.Include(t => t.Comments).FirstOrDefault(task => task.Id == id);
             if (existing == null)
             {
                 return NotFound();
@@ -88,7 +88,7 @@ namespace Laborator3.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var existing = context.Tasks.FirstOrDefault(t => t.Id == id);
+            var existing = context.Tasks.Include(t => t.Comments).FirstOrDefault(t => t.Id == id);
             if (existing == null)
             {
                 return NotFound();

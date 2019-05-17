@@ -17,5 +17,8 @@ namespace Laborator3.Models
         // DbSet = O tabela din baza de date
         public DbSet<Task> Tasks { get; set; }
 
+        public DbSet<Comment> Comments { get; set; }
+
+
     }
 }
