@@ -21,9 +21,20 @@ namespace Laborator3.Controllers
 
         // GET: api/Tasks
         [HttpGet]
-        public IEnumerable<Models.Task> Get()
+        public IEnumerable<Models.Task> Get([FromQuery]DateTime? from, [FromQuery]DateTime? to)
         {
-            return context.Tasks;
+            IQueryable<Models.Task> result = context.Tasks;
+
+            if (from == null && to == null)
+                return result;
+
+            if (from != null)
+                result = result.Where(t => t.Deadline >= from);
+
+            if (to != null)
+                result = result.Where(t => t.Deadline <= to);
+
+            return result;
         }
 
         // GET: api/Tasks/5
@@ -43,6 +54,8 @@ namespace Laborator3.Controllers
         [HttpPost]
         public void Post([FromBody] Models.Task task)
         {
+            task.DateClosed = null;
+            task.DateAdded = DateTime.Now;
             context.Tasks.Add(task);
             context.SaveChanges();
         }
@@ -54,11 +67,18 @@ namespace Laborator3.Controllers
             var existing = context.Tasks.AsNoTracking().FirstOrDefault(t => t.Id == id);
             if (existing == null)
             {
+                task.DateClosed = null;
+                task.DateAdded = DateTime.Now;
                 context.Tasks.Add(task);
                 context.SaveChanges();
                 return Ok(task);
             }
             task.Id = id;
+            if (task.TaskState == TaskState.Closed && existing.TaskState != TaskState.Closed)
+                task.DateClosed = DateTime.Now;
+            else if (existing.TaskState == TaskState.Closed && task.TaskState != TaskState.Closed)
+                task.DateClosed = null;
+
             context.Tasks.Update(task);
             context.SaveChanges();
             return Ok(task);
