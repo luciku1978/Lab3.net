@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Laborator3.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -62,6 +63,11 @@ namespace Laborator3
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
+            // https://stackoverflow.com/questions/38198100/addtransient-addscoped-addsingleton-srvices-differences
+            // Dependency injection
+            services.AddScoped<ITaskService, TaskService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

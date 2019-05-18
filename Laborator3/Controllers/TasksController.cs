@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Laborator3.Models;
+using Laborator3.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Task = Laborator3.Models.Task;
 
 namespace Laborator3.Controllers
 {
@@ -13,10 +15,11 @@ namespace Laborator3.Controllers
     [ApiController]
     public class TasksController : ControllerBase
     {
-        private TasksDbContext context;
-        public TasksController(TasksDbContext context)
+        private ITaskService taskService;
+
+        public TasksController(ITaskService taskService)
         {
-            this.context = context;
+            this.taskService = taskService;
         }
 
         // GET: api/Tasks
@@ -30,18 +33,8 @@ namespace Laborator3.Controllers
         [HttpGet]
         public IEnumerable<Models.Task> Get([FromQuery]DateTime? from, [FromQuery]DateTime? to)
         {
-            IQueryable<Models.Task> result = context.Tasks.Include(t => t.Comments);
-
-            if (from == null && to == null)
-                return result;
-
-            if (from != null)
-                result = result.Where(t => t.Deadline >= from);
-
-            if (to != null)
-                result = result.Where(t => t.Deadline <= to);
-
-            return result;
+            
+            return taskService.GetAll(from, to);
         }
 
         // GET: api/Tasks/5
@@ -54,13 +47,13 @@ namespace Laborator3.Controllers
         [HttpGet("{id}", Name = "Get")]
         public IActionResult Get(int id)
         {
-            var existing = context.Tasks.Include(t => t.Comments).FirstOrDefault(task => task.Id == id);
-            if (existing == null)
+            var found = taskService.GetById(id);
+            if (found == null)
             {
                 return NotFound();
             }
 
-            return Ok(existing);
+            return Ok(found);
         }
 
         // POST: api/Tasks
@@ -98,12 +91,9 @@ namespace Laborator3.Controllers
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public void Post([FromBody] Models.Task task)
+        public void Post([FromBody] Task task)
         {
-            task.DateClosed = null;
-            task.DateAdded = DateTime.Now;
-            context.Tasks.Add(task);
-            context.SaveChanges();
+            taskService.Create(task);
         }
 
         // PUT: api/Tasks/5
@@ -114,26 +104,10 @@ namespace Laborator3.Controllers
         /// <param name="task">The object Task</param>
         /// <returns>The updated task/new created task.</returns>
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Models.Task task)
+        public IActionResult Put(int id, [FromBody] Task task)
         {
-            var existing = context.Tasks.AsNoTracking().FirstOrDefault(t => t.Id == id);
-            if (existing == null)
-            {
-                task.DateClosed = null;
-                task.DateAdded = DateTime.Now;
-                context.Tasks.Add(task);
-                context.SaveChanges();
-                return Ok(task);
-            }
-            task.Id = id;
-            if (task.TaskState == TaskState.Closed && existing.TaskState != TaskState.Closed)
-                task.DateClosed = DateTime.Now;
-            else if (existing.TaskState == TaskState.Closed && task.TaskState != TaskState.Closed)
-                task.DateClosed = null;
-
-            context.Tasks.Update(task);
-            context.SaveChanges();
-            return Ok(task);
+            var result = taskService.Upsert(id, task);
+            return Ok(result);
         }
 
         // DELETE: api/ApiWithActions/5
@@ -145,14 +119,13 @@ namespace Laborator3.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var existing = context.Tasks.Include(t => t.Comments).FirstOrDefault(t => t.Id == id);
-            if (existing == null)
+            var result = taskService.Delete(id);
+            if (result == null)
             {
                 return NotFound();
             }
-            context.Tasks.Remove(existing);
-            context.SaveChanges();
-            return Ok();
+           
+            return Ok(result);
         }
 
     }
