@@ -67,7 +67,7 @@ namespace Laborator3
             // https://stackoverflow.com/questions/38198100/addtransient-addscoped-addsingleton-srvices-differences
             // Dependency injection
             services.AddScoped<ITaskService, TaskService>();
-
+            services.AddScoped<ICommentService, CommentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
