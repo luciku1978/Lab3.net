@@ -60,7 +60,7 @@ namespace Laborator3.Controllers
         /// <summary>
         /// Add a task
         /// </summary>
-        /// /// <remarks>
+        ///  <remarks>
         /// Sample request:
         ///
         ///     POST /tasks
@@ -100,6 +100,31 @@ namespace Laborator3.Controllers
         /// <summary>
         /// Update a task with the given ID, or create a new task if the ID does not exist.
         /// </summary>
+        ///<remarks>
+        /// Sample request:
+        ///
+        ///     PUT /tasks
+        ///    {
+        ///         "title": "Expedia Conference",
+        ///         "description": "Attending Expedia Conference at Hilton",
+        ///         "dateAdded": "2019-05-17T10:08:57.3616694",
+        ///         "deadline": "2019-06-01T12:00:00",
+        ///         "taskImportance": 2,
+        ///         "taskState": 0,
+        ///         "dateClosed": null,
+        ///         "comments": [
+        ///	            {
+        ///		            "text": "Write down some important questions!",
+        ///		            "important": true
+        ///             },
+        ///	            {
+        ///		            "text": "Get all the relevant info for the market!",
+        ///		            "important": false
+        ///	            }
+        ///	                    ]
+        ///     }
+        ///
+        /// </remarks>
         /// <param name="id">task ID</param>
         /// <param name="task">The object Task</param>
         /// <returns>The updated task/new created task.</returns>
@@ -116,6 +141,8 @@ namespace Laborator3.Controllers
         /// </summary>
         /// <param name="id">ID of the task to be deleted.</param>
         /// <returns>The deleted task object.</returns>
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
